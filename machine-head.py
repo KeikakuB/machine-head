@@ -6,12 +6,16 @@ import shlex
 import random
 
 import discord
+from discord.utils import get
+from discord.ext import commands
 import asyncio
 
 import logging
 
 from subprocess import run
 
+emojis_yes_or_no = ['👍', '👎']
+emojis_choices = ['1⃣','2⃣','3⃣','4⃣','5⃣','6⃣','7⃣','8⃣','9⃣']
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -24,6 +28,9 @@ with open('secret/data.json') as f:
 
 client = discord.Client()
 
+command_prefix = '!'
+bot = commands.Bot(command_prefix=command_prefix)
+
 @client.event
 async def on_ready():
     print('Logged in as')
@@ -31,50 +38,62 @@ async def on_ready():
     print(client.user.id)
     print('------')
 
-commands = ['!roll', '!k', '!test', '!sleep']
+def is_user_allowed(user):
+    return user.id == data['admin_id'] and not user.bot
+
 @client.event
 async def on_message(message):
-    if message.content.startswith('!'):
-        args = shlex.split(message.content)
-        if len(args) > 0:
-            cmd = args[0]
-            print(args)
-            if cmd in commands:
-                if message.author.id != data['admin_id'] :
-                    await client.send_message(message.channel, "I'm still in development, please be patient")
+    if message.content.startswith(command_prefix):
+        if not is_user_allowed(message.author):
+            await client.send_message(message.channel, "I'm still in development, please be patient")
+        else:
+            await bot.process_commands(message)
 
-                if message.author.bot:
-                    await client.send_message(message.channel, "Bleep Bloop")
+@bot.command(pass_context=True)
+async def roll(ctx):
+    args = shlex.split(ctx.message.content)
+    print(args)
+    die = args[1]
+    (count, kind) = die.split('d')
+    count = int(count)
+    kind = int(kind)
+    if count > 0 and count < 20 and kind > 1:
+        tmp = await client.send_message(ctx.message.channel, 'Rolling ...')
+        await asyncio.sleep(1)
+        result = 0
+        for i in range(count):
+            result += random.randint(1, kind)
+        await client.edit_message(tmp, 'Rolled {}!'.format(result))
 
-                if cmd == commands[0]:
-                    print('rolling')
-                    die = args[1]
-                    (count, kind) = die.split('d')
-                    count = int(count)
-                    kind = int(kind)
-                    if count > 0 and count < 20 and kind > 1:
-                        tmp = await client.send_message(message.channel, 'Rolling ...')
-                        await asyncio.sleep(1)
-                        result = 0
-                        for i in range(count):
-                            result += random.randint(1, kind)
-                        await client.edit_message(tmp, 'Rolled {}!'.format(result))
 
-                elif cmd == commands[1]:
-                    await client.send_message(message.channel, "I'm recompiling...")
-                    run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
-                    sys.exit(0)
+@bot.command(pass_context=True)
+async def poll(ctx):
+    args = shlex.split(ctx.message.content)
+    print(args)
+    choices = args[1:]
+    #'👍', '👎']
+    choices_str = ''
+    if len(choices) > 1:
+        raise ValueError('too many choices')
+    elif len(choices) > 1:
+        for i in range(len(choices)):
+            choices_str += '{}: {}\n'.format(i + 1, choices[i])
+        tmp = await client.send_message(ctx.message.channel, choices_str)
+        for i in range(len(choices)):
+            await client.add_reaction(tmp, emojis_choices[i])
+    elif len(choices) == 1:
+        question = choices[0]
+        mark = '?'
+        if not question.endswith(mark):
+            question += mark
+        tmp = await client.send_message(ctx.message.channel, question)
+        await client.add_reaction(tmp, emojis_yes_or_no[0])
+        await client.add_reaction(tmp, emojis_yes_or_no[1])
 
-                elif cmd == commands[2]:
-                    counter = 0
-                    tmp = await client.send_message(message.channel, 'Calculating messages...')
-                    async for log in client.logs_from(message.channel, limit=100):
-                        if log.author == message.author:
-                            counter += 1
-                    await client.edit_message(tmp, 'You have {} messages.'.format(counter))
-
-                elif cmd == commands[3]:
-                    await asyncio.sleep(5)
-                    await client.send_message(message.channel, 'Done sleeping')
+@bot.command(pass_context=True)
+async def k(ctx):
+    await client.send_message(ctx.message.channel, "I'm recompiling...")
+    run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
+    sys.exit(0)
 
 client.run(data['bot_token'])
