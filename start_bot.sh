@@ -1,7 +1,4 @@
 #!/bin/bash
-FILE='bot.pid'
-ID=$(<"$FILE")
-# Kill the bot if needed
-kill "$ID"
+pkill machine_head 
 # Start the bot and store its pid in 'bot.pid' file
-machine_head & echo $! > "$FILE"
+machine_head
