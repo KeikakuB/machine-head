@@ -58,7 +58,7 @@ async def send_cmd_help(ctx):
 
 def is_admin():
     def predicate(ctx):
-        return ctx.author.id == data['admin_id']
+        return ctx.message.author.id == data['admin_id']
     return commands.check(predicate)
 
 @bot.event
@@ -66,12 +66,16 @@ async def on_message(message):
     #ignore messsages from bots (including ourself)
     await bot.process_commands(message)
 
-@bot.command(
-    name='event',
-    pass_context=True
-)
-async def event(ctx, *datetime : str):
-    date = ' '.join(datetime)
+@bot.group(pass_context=True)
+async def event(ctx):
+    """ Manages events. """
+    if ctx.invoked_subcommand is None:
+        await send_cmd_help(ctx)
+
+@event.command()
+async def add(name: str, *when: str):
+    """ Add an event. """
+    date = ' '.join(when)
     try:
         res = dateparser.parse(date, languages=['en'])
         if res is None:
@@ -80,6 +84,10 @@ async def event(ctx, *datetime : str):
     except Exception as e:
         await bot.say(e)
 
+@event.command()
+async def list():
+    """ List all events. """
+    await bot.say('DEV: Listing events...')
 
 @bot.command(
     name='choose',
