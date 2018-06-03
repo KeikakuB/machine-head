@@ -306,7 +306,7 @@ async def _k(ctx):
 
 
 
-def main()
+def main():
     try:
         with DbConn() as c:
             c.execute('DROP TABLE events')
