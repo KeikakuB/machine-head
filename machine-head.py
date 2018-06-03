@@ -37,6 +37,24 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+
+@bot.event
+async def on_command_error(error, ctx):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await send_cmd_help(ctx)
+    elif isinstance(error, commands.BadArgument):
+        await send_cmd_help(ctx)
+
+async def send_cmd_help(ctx):
+    if ctx.invoked_subcommand:
+        pages = bot.formatter.format_help_for(ctx, ctx.invoked_subcommand)
+        for page in pages:
+            await bot.send_message(ctx.message.channel, page)
+    else:
+        pages = bot.formatter.format_help_for(ctx, ctx.command)
+        for page in pages:
+            await bot.send_message(ctx.message.channel, page)
+
 def is_user_allowed(user):
     return user.id == data['admin_id']
 
@@ -46,19 +64,29 @@ async def on_message(message):
     await bot.process_commands(message)
 
 @bot.command(
+    name='choose',
+    pass_context=True
+)
+async def choose(ctx, *options : str):
+    """ Choose between several different options. """
+    tmp = await bot.say('Thinking ...')
+    await asyncio.sleep(1)
+    await bot.edit_message(tmp, 'Chose: {}'.format(random.choice(options)))
+
+@bot.command(
     name='roll',
     pass_context=True
 )
 async def roll(ctx, dice : str):
-    """Rolls a dice in NdN format."""
+    """Roll a dice in NdN format."""
     try:
         rolls, limit = map(int, dice.split('d'))
     except Exception:
-        await bot.send_message(ctx.message.channel, 'Format has to be in NdN!')
+        await bot.say('Format has to be in NdN!')
         return
 
     result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
-    tmp = await bot.send_message(ctx.message.channel, 'Rolling ...')
+    tmp = await bot.say('Rolling ...')
     await asyncio.sleep(1)
     await bot.edit_message(tmp, 'Rolled {}!'.format(result))
 
@@ -67,19 +95,21 @@ async def roll(ctx, dice : str):
     pass_context=True
 )
 async def poll(ctx, *choices : str):
-    """ Run a poll by asking a single question or multiple choices. """
+    """ Run a poll by asking a single question or giving multiple choices. """
     try:
-        if len(choices) > 9:
+        if len(choices) == 0:
+            await send_cmd_help(ctx)
+        elif len(choices) > 9:
             raise ValueError('!poll only supports up to nine choices.')
     except Exception as e:
-        await bot.send_message(ctx.message.channel, e)
+        await bot.say(e)
         return
     choices_str = ''
 
     if len(choices) > 1:
         for i in range(len(choices)):
             choices_str += '{}: {}\n'.format(i + 1, choices[i])
-        tmp = await bot.send_message(ctx.message.channel, choices_str)
+        tmp = await bot.say(choices_str)
         for i in range(len(choices)):
             await bot.add_reaction(tmp, emojis_choices[i])
     elif len(choices) == 1:
@@ -87,21 +117,20 @@ async def poll(ctx, *choices : str):
         mark = '?'
         if not question.endswith(mark):
             question += mark
-        tmp = await bot.send_message(ctx.message.channel, question)
+        tmp = await bot.say(question)
         await bot.add_reaction(tmp, emojis_yes_or_no[0])
         await bot.add_reaction(tmp, emojis_yes_or_no[1])
 
 @bot.command(
     name='k',
-    description='Restart this bot',
     pass_context=True
 )
 async def k(ctx):
-    """ Restarts the bot. """
+    """ Restart the bot. """
     if not is_user_allowed(ctx.message.author):
-        await bot.send_message(ctx.message.channel, "You're not allowed to do that!")
+        await bot.say("You're not allowed to do that!")
     else:
-        await bot.send_message(ctx.message.channel, "I'm recompiling...")
+        await bot.say("I'm recompiling...")
         run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
         sys.exit(0)
 
