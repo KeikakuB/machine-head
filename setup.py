@@ -5,5 +5,5 @@ setup(
     py_modules=['machine-head'],
     packages=find_packages(),
     python_requires='>=3',
-    install_requires=['discord.py']
+    install_requires=['discord.py', 'dateparser']
 )

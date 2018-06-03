@@ -4,6 +4,7 @@ import sys
 import json
 import shlex
 import random
+import dateparser
 
 import discord
 from discord.utils import get
@@ -55,13 +56,30 @@ async def send_cmd_help(ctx):
         for page in pages:
             await bot.send_message(ctx.message.channel, page)
 
-def is_user_allowed(user):
-    return user.id == data['admin_id']
+def is_admin():
+    def predicate(ctx):
+        return ctx.author.id == data['admin_id']
+    return commands.check(predicate)
 
 @bot.event
 async def on_message(message):
     #ignore messsages from bots (including ourself)
     await bot.process_commands(message)
+
+@bot.command(
+    name='event',
+    pass_context=True
+)
+async def event(ctx, *datetime : str):
+    date = ' '.join(datetime)
+    try:
+        res = dateparser.parse(date, languages=['en'])
+        if res is None:
+            raise ValueError('Failed to parse')
+        await bot.say(res)
+    except Exception as e:
+        await bot.say(e)
+
 
 @bot.command(
     name='choose',
@@ -125,13 +143,11 @@ async def poll(ctx, *choices : str):
     name='k',
     pass_context=True
 )
+@is_admin()
 async def k(ctx):
     """ Restart the bot. """
-    if not is_user_allowed(ctx.message.author):
-        await bot.say("You're not allowed to do that!")
-    else:
-        await bot.say("I'm recompiling...")
-        run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
-        sys.exit(0)
+    await bot.say("I'm recompiling...")
+    run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
+    sys.exit(0)
 
 bot.run(data['bot_token'])
