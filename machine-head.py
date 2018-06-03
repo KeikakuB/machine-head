@@ -27,28 +27,23 @@ logger.addHandler(handler)
 with open('secret/data.json') as f:
     data = json.load(f)
 
-client = discord.Client()
-
-command_prefix = '!'
+command_prefix = '?'
 bot = commands.Bot(command_prefix=command_prefix)
 
-@client.event
+@bot.event
 async def on_ready():
     print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
+    print(bot.user.name)
+    print(bot.user.id)
     print('------')
 
 def is_user_allowed(user):
     return user.id == data['admin_id']
 
-@client.event
+@bot.event
 async def on_message(message):
     #ignore messsages from bots (including ourself)
-    if message.author.bot:
-        pass
-    else:
-        await bot.process_commands(message)
+    await bot.process_commands(message)
 
 @bot.command(
     name='roll',
@@ -59,13 +54,13 @@ async def roll(ctx, dice : str):
     try:
         rolls, limit = map(int, dice.split('d'))
     except Exception:
-        await client.send_message(ctx.message.channel, 'Format has to be in NdN!')
+        await bot.send_message(ctx.message.channel, 'Format has to be in NdN!')
         return
 
     result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
-    tmp = await client.send_message(ctx.message.channel, 'Rolling ...')
+    tmp = await bot.send_message(ctx.message.channel, 'Rolling ...')
     await asyncio.sleep(1)
-    await client.edit_message(tmp, 'Rolled {}!'.format(result))
+    await bot.edit_message(tmp, 'Rolled {}!'.format(result))
 
 @bot.command(
     name='poll',
@@ -77,24 +72,24 @@ async def poll(ctx, *choices : str):
         if len(choices) > 9:
             raise ValueError('!poll only supports up to nine choices.')
     except Exception as e:
-        await client.send_message(ctx.message.channel, e)
+        await bot.send_message(ctx.message.channel, e)
         return
     choices_str = ''
 
     if len(choices) > 1:
         for i in range(len(choices)):
             choices_str += '{}: {}\n'.format(i + 1, choices[i])
-        tmp = await client.send_message(ctx.message.channel, choices_str)
+        tmp = await bot.send_message(ctx.message.channel, choices_str)
         for i in range(len(choices)):
-            await client.add_reaction(tmp, emojis_choices[i])
+            await bot.add_reaction(tmp, emojis_choices[i])
     elif len(choices) == 1:
         question = choices[0]
         mark = '?'
         if not question.endswith(mark):
             question += mark
-        tmp = await client.send_message(ctx.message.channel, question)
-        await client.add_reaction(tmp, emojis_yes_or_no[0])
-        await client.add_reaction(tmp, emojis_yes_or_no[1])
+        tmp = await bot.send_message(ctx.message.channel, question)
+        await bot.add_reaction(tmp, emojis_yes_or_no[0])
+        await bot.add_reaction(tmp, emojis_yes_or_no[1])
 
 @bot.command(
     name='k',
@@ -102,11 +97,12 @@ async def poll(ctx, *choices : str):
     pass_context=True
 )
 async def k(ctx):
+    """ Restarts the bot. """
     if not is_user_allowed(ctx.message.author):
-        await client.send_message(ctx.message.channel, "You're not allowed to do that!")
+        await bot.send_message(ctx.message.channel, "You're not allowed to do that!")
     else:
-        await client.send_message(ctx.message.channel, "I'm recompiling...")
+        await bot.send_message(ctx.message.channel, "I'm recompiling...")
         run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
         sys.exit(0)
 
-client.run(data['bot_token'])
+bot.run(data['bot_token'])
