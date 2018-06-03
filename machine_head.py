@@ -18,6 +18,9 @@ import logging
 
 from subprocess import run
 
+with open('secret/data.json') as f:
+    data = json.load(f)
+
 emojis_yes_or_no = ['👍', '👎']
 emojis_choices = ['1⃣','2⃣','3⃣','4⃣','5⃣','6⃣','7⃣','8⃣','9⃣']
 
@@ -335,9 +338,5 @@ def main():
             )
             """
             )
-
-
-    with open('secret/data.json') as f:
-        data = json.load(f)
     bot.run(data['bot_token'])
 

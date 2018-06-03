@@ -10,6 +10,6 @@ Catch
     $_.Exception.Message
 }
 # Start the bot
-$app = Start-Process -passthru -nonewwindow python machine-head.py
+$app = Start-Process -passthru -nonewwindow machine_head.exe
 # Store its pid in 'bot.pid' file
 echo $app.Id > $FILE
