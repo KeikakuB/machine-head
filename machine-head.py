@@ -45,7 +45,8 @@ def is_user_allowed(user):
 async def on_message(message):
     if message.content.startswith(command_prefix):
         if not is_user_allowed(message.author):
-            await client.send_message(message.channel, "I'm still in development, please be patient")
+            #await client.send_message(message.channel, "I'm still in development, please be patient")
+            pass
         else:
             await bot.process_commands(message)
 
@@ -73,7 +74,7 @@ async def poll(ctx):
     choices = args[1:]
     #'👍', '👎']
     choices_str = ''
-    if len(choices) > 1:
+    if len(choices) > 9:
         raise ValueError('too many choices')
     elif len(choices) > 1:
         for i in range(len(choices)):
@@ -92,8 +93,11 @@ async def poll(ctx):
 
 @bot.command(pass_context=True)
 async def k(ctx):
-    await client.send_message(ctx.message.channel, "I'm recompiling...")
-    run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
-    sys.exit(0)
+    if not is_user_allowed(ctx.message.author):
+        await client.send_message(ctx.message.channel, "You're not allowed to do that!")
+    else:
+        await client.send_message(ctx.message.channel, "I'm recompiling...")
+        run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
+        sys.exit(0)
 
 client.run(data['bot_token'])
