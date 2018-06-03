@@ -301,10 +301,8 @@ async def _poll(ctx, *choices : str):
 async def _k(ctx):
     """ Restart the bot. """
     await bot.say("I'm restarting...")
-    run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
+    run(shlex.split(data['restart_command']))
     sys.exit(0)
-
-
 
 def main():
     try:
