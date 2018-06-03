@@ -41,40 +41,6 @@ class DbConn():
         self.db.close()
 
 
-try:
-    with DbConn() as c:
-        c.execute('DROP TABLE events')
-        c.execute('DROP TABLE event_members')
-finally:
-    with DbConn() as c:
-        c.execute(
-        """
-        CREATE TABLE EVENTS
-        (
-            ID INTEGER PRIMARY KEY,
-            OWNER INTEGER NOT NULL,
-            NAME TEXT NOT NULL,
-            DATE TIMESTAMP NOT NULL,
-            DESCRIPTION TEXT NOT NULL,
-            LOCATION TEXT NOT NULL
-        )
-        """
-        )
-
-        c.execute(
-        """
-        CREATE TABLE EVENT_MEMBERS
-        (
-            ID INTEGER PRIMARY KEY,
-            EVENT_ID INTEGER,
-            USER_ID INT NOT NULL
-        )
-        """
-        )
-
-
-with open('secret/data.json') as f:
-    data = json.load(f)
 
 command_prefix = '?'
 bot = commands.Bot(command_prefix=command_prefix)
@@ -338,4 +304,42 @@ async def _k(ctx):
     run(shlex.split(r"""powershell.exe -file "start_bot.ps1" """))
     sys.exit(0)
 
-bot.run(data['bot_token'])
+
+
+def main()
+    try:
+        with DbConn() as c:
+            c.execute('DROP TABLE events')
+            c.execute('DROP TABLE event_members')
+    finally:
+        with DbConn() as c:
+            c.execute(
+            """
+            CREATE TABLE EVENTS
+            (
+                ID INTEGER PRIMARY KEY,
+                OWNER INTEGER NOT NULL,
+                NAME TEXT NOT NULL,
+                DATE TIMESTAMP NOT NULL,
+                DESCRIPTION TEXT NOT NULL,
+                LOCATION TEXT NOT NULL
+            )
+            """
+            )
+
+            c.execute(
+            """
+            CREATE TABLE EVENT_MEMBERS
+            (
+                ID INTEGER PRIMARY KEY,
+                EVENT_ID INTEGER,
+                USER_ID INT NOT NULL
+            )
+            """
+            )
+
+
+    with open('secret/data.json') as f:
+        data = json.load(f)
+    bot.run(data['bot_token'])
+
