@@ -8,6 +8,7 @@ import random
 import discord
 from discord.utils import get
 from discord.ext import commands
+import traceback
 import asyncio
 
 import logging
@@ -39,44 +40,48 @@ async def on_ready():
     print('------')
 
 def is_user_allowed(user):
-    return user.id == data['admin_id'] and not user.bot
+    return user.id == data['admin_id']
 
 @client.event
 async def on_message(message):
-    if message.content.startswith(command_prefix):
-        if not is_user_allowed(message.author):
-            #await client.send_message(message.channel, "I'm still in development, please be patient")
-            pass
-        else:
-            await bot.process_commands(message)
+    #ignore messsages from bots (including ourself)
+    if message.author.bot:
+        pass
+    else:
+        await bot.process_commands(message)
 
-@bot.command(pass_context=True)
-async def roll(ctx):
-    args = shlex.split(ctx.message.content)
-    print(args)
-    die = args[1]
-    (count, kind) = die.split('d')
-    count = int(count)
-    kind = int(kind)
-    if count > 0 and count < 20 and kind > 1:
-        tmp = await client.send_message(ctx.message.channel, 'Rolling ...')
-        await asyncio.sleep(1)
-        result = 0
-        for i in range(count):
-            result += random.randint(1, kind)
-        await client.edit_message(tmp, 'Rolled {}!'.format(result))
+@bot.command(
+    name='roll',
+    pass_context=True
+)
+async def roll(ctx, dice : str):
+    """Rolls a dice in NdN format."""
+    try:
+        rolls, limit = map(int, dice.split('d'))
+    except Exception:
+        await client.send_message(ctx.message.channel, 'Format has to be in NdN!')
+        return
 
+    result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+    tmp = await client.send_message(ctx.message.channel, 'Rolling ...')
+    await asyncio.sleep(1)
+    await client.edit_message(tmp, 'Rolled {}!'.format(result))
 
-@bot.command(pass_context=True)
-async def poll(ctx):
-    args = shlex.split(ctx.message.content)
-    print(args)
-    choices = args[1:]
-    #'👍', '👎']
+@bot.command(
+    name='poll',
+    pass_context=True
+)
+async def poll(ctx, *choices : str):
+    """ Run a poll by asking a single question or multiple choices. """
+    try:
+        if len(choices) > 9:
+            raise ValueError('!poll only supports up to nine choices.')
+    except Exception as e:
+        await client.send_message(ctx.message.channel, e)
+        return
     choices_str = ''
-    if len(choices) > 9:
-        raise ValueError('too many choices')
-    elif len(choices) > 1:
+
+    if len(choices) > 1:
         for i in range(len(choices)):
             choices_str += '{}: {}\n'.format(i + 1, choices[i])
         tmp = await client.send_message(ctx.message.channel, choices_str)
@@ -91,7 +96,11 @@ async def poll(ctx):
         await client.add_reaction(tmp, emojis_yes_or_no[0])
         await client.add_reaction(tmp, emojis_yes_or_no[1])
 
-@bot.command(pass_context=True)
+@bot.command(
+    name='k',
+    description='Restart this bot',
+    pass_context=True
+)
 async def k(ctx):
     if not is_user_allowed(ctx.message.author):
         await client.send_message(ctx.message.channel, "You're not allowed to do that!")
