@@ -48,6 +48,14 @@ class DbConn():
 command_prefix = '?'
 bot = commands.Bot(command_prefix=command_prefix)
 
+@bot.check
+def globally_block_for_channel(ctx):
+    is_dev_channel = ctx.message.channel.id == data['dev_channel_id']
+    if data['is_dev_bot']:
+        return is_dev_channel
+    else:
+        return not is_dev_channel
+
 def get_date_str(date):
     return date.strftime('''%A %B %d at %I:%m%p''')
 
@@ -297,14 +305,33 @@ async def _poll(ctx, *choices : str):
         await bot.add_reaction(tmp, emojis_yes_or_no[1])
 
 @bot.command(
+    name='info',
+    pass_context=True
+)
+@is_admin()
+async def _info(ctx):
+    """ Gives info on the bot. """
+    await bot.say("I'm {}...".format(data['name']))
+
+@bot.command(
+    name='r',
+    pass_context=True
+)
+@is_admin()
+async def _r(ctx):
+    """ Restart the bot. """
+    await bot.say("I'm restarting...")
+    run(shlex.split(data['restart_command']))
+    sys.exit(0)
+
+@bot.command(
     name='k',
     pass_context=True
 )
 @is_admin()
 async def _k(ctx):
-    """ Restart the bot. """
-    await bot.say("I'm restarting...")
-    run(shlex.split(data['restart_command']))
+    """ Kills the bot. """
+    await bot.say("I'm going to sleep...")
     sys.exit(0)
 
 def main():
