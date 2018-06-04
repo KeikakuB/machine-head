@@ -2,13 +2,10 @@
 
 import sys
 import json
-import shlex
 
 import discord
 from discord.ext import commands
 import logging
-
-from subprocess import run
 
 with open('secret/data.json') as f:
     data = json.load(f)
@@ -23,9 +20,6 @@ description = '''An example bot to showcase the discord.ext.commands extension
 module.
 
 There are a number of utility commands being showcased here.'''
-
-# this specifies what extensions to load when the bot starts up
-startup_extensions = ["events", "rng"]
 
 command_prefix = '?'
 bot = commands.Bot(command_prefix=command_prefix)
@@ -95,35 +89,13 @@ async def _unload(extension_name : str):
     await bot.say("{} unloaded.".format(extension_name))
 
 
-@bot.command(name='info')
-@is_admin()
-async def _info():
-    """[ADMIN] Gives info on the bot. """
-    await bot.say("I'm {}...".format(data['name']))
-
-@bot.command(name='r')
-@is_admin()
-async def _r():
-    """[ADMIN] Restart the bot. """
-    await bot.say("I'm restarting...")
-    run(shlex.split(data['restart_command']))
-    await bot.logout()
-    sys.exit(0)
-
-@bot.command(name='k')
-@is_admin()
-async def _k():
-    """[ADMIN] Kills the bot. """
-    await bot.say("I'm going to sleep...")
-    await bot.logout()
-    sys.exit(0)
-
 
 def main():
-    for extension in startup_extensions:
-        try:
-            bot.load_extension(extension)
-        except Exception as e:
-            exc = '{}: {}'.format(type(e).__name__, e)
-            print('Failed to load extension {}\n{}'.format(extension, exc))
+    for extension in data['extensions']:
+        if extension['is_startup']:
+            try:
+                bot.load_extension(extension['name'])
+            except Exception as e:
+                exc = '{}: {}'.format(type(e).__name__, e)
+                print('Failed to load extension {}\n{}'.format(extension, exc))
     bot.run(data['bot_token'])
