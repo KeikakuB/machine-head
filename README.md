@@ -4,6 +4,14 @@ Personal Discord bot
 
 
 # TODO
+- dev:
+    - put extensions into .json file [ {name: x, is_startup: true } , ...]
+    - Implement command for resetting the db, don't always do it reeeeeeeeeeeeeeeeee
+    - put dev commands in dev module -> it'll work now because I'll import the things i need eg. subprocess
+        - only enable it in dev bot
+- Event Reminders:
+    - Implement !remind *event_id* *message* *timedelta=defaults to at time of meeting*
+        - does a @everyone with the event details and the reminder message in the given channel
 - Logging:
     - figure out how to actually see errors as they are raised
     - setup logging everywhere with logger
