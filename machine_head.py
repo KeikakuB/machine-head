@@ -1,9 +1,7 @@
 #! python3
 
-import sys
 import json
 
-import discord
 from discord.ext import commands
 import logging
 
@@ -12,8 +10,13 @@ with open('secret/data.json') as f:
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+handler = logging.FileHandler(
+    filename='discord.log',
+    encoding='utf-8',
+    mode='w')
+handler.setFormatter(
+    logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+)
 logger.addHandler(handler)
 
 description = '''An example bot to showcase the discord.ext.commands extension
@@ -33,10 +36,12 @@ def globally_block_for_channel(ctx):
     else:
         return not is_dev_channel
 
+
 def is_admin():
     def predicate(ctx):
         return ctx.message.author.id == data['admin_id']
     return commands.check(predicate)
+
 
 @bot.event
 async def on_ready():
@@ -45,12 +50,14 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
+
 @bot.event
 async def on_command_error(error, ctx):
     if isinstance(error, commands.MissingRequiredArgument):
         await send_cmd_help(ctx)
     elif isinstance(error, commands.BadArgument):
         await send_cmd_help(ctx)
+
 
 async def send_cmd_help(ctx):
     if ctx.invoked_subcommand:
@@ -62,14 +69,16 @@ async def send_cmd_help(ctx):
         for page in pages:
             await bot.send_message(ctx.message.channel, page)
 
+
 @bot.event
 async def on_message(message):
-    #ignore messsages from bots (including ourself)
+    # ignore messsages from bots (including ourself)
     await bot.process_commands(message)
+
 
 @bot.command(name='load')
 @is_admin()
-async def _load(extension_name : str):
+async def _load(extension_name: str):
     """[ADMIN] Loads an extension."""
     try:
         bot.load_extension(extension_name)
@@ -78,16 +87,16 @@ async def _load(extension_name : str):
         return
     await bot.say("{} loaded.".format(extension_name))
 
+
 @bot.command(name='unload')
 @is_admin()
-async def _unload(extension_name : str):
+async def _unload(extension_name: str):
     """[ADMIN] Unloads an extension."""
     if extension_name == 'admin':
         await bot.say("{} module can't be unloaded.".format(extension_name))
         return
     bot.unload_extension(extension_name)
     await bot.say("{} unloaded.".format(extension_name))
-
 
 
 def main():
