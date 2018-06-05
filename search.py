@@ -1,5 +1,4 @@
 import regex
-import discord
 from discord.ext import commands
 
 
@@ -22,18 +21,27 @@ class Search():
         name='steam',
         pass_context=True
     )
-    async def _steam(self, ctx, *search : str):
+    async def _steam(self, ctx, *search: str):
         """ Search for game on steam. """
         try:
             search = ' '.join(search)
-            match = regex.search('"appid":(\d+),"name":"\w*{}'.format(search), self.data_text, regex.IGNORECASE)
+            match = regex.search(
+                '"appid":(\d+),"name":"\w*{}'.format(search),
+                self.data_text,
+                regex.IGNORECASE
+            )
             if match is not None:
                 id = match.group(1)
-                await self.bot.say("https://store.steampowered.com/app/{}/".format(id))
+                await self.bot.say(
+                    "https://store.steampowered.com/app/{}/".format(id)
+                )
             else:
-                await self.bot.say("No game found with search term '{}'".format(search))
+                await self.bot.say(
+                    "No game found with search term '{}'".format(search)
+                )
         except Exception as e:
             await self.bot.say(e)
+
 
 def setup(bot):
     bot.add_cog(Search(bot))

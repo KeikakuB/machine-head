@@ -7,6 +7,7 @@ from subprocess import run
 with open('secret/data.json') as f:
     data = json.load(f)
 
+
 class Dev():
     def __init__(self, bot):
         self.bot = bot
@@ -38,6 +39,7 @@ class Dev():
         await self.bot.say("I'm going to sleep...")
         await self.bot.logout()
         sys.exit(0)
+
 
 def setup(bot):
     bot.add_cog(Dev(bot))

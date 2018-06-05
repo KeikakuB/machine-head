@@ -1,24 +1,31 @@
-import discord
 from discord.ext import commands
 from discord.utils import get
 import sqlite3
 import dateparser
 import datetime
 
+
 class DbConn():
     def __init__(self):
         pass
+
     def __enter__(self):
-        self.db = sqlite3.connect('data/data.sqlite', detect_types=sqlite3.PARSE_DECLTYPES)
+        self.db = sqlite3.connect(
+            'data/data.sqlite',
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
         self.cursor = self.db.cursor()
         return self.cursor
+
     def __exit__(self, type, value, traceback):
         self.db.commit()
         self.cursor.close()
         self.db.close()
 
+
 emojis_yes_or_no = ['👍', '👎']
-emojis_choices = ['1⃣','2⃣','3⃣','4⃣','5⃣','6⃣','7⃣','8⃣','9⃣']
+emojis_choices = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣']
+
 
 class Events():
     def __init__(self, bot):
@@ -30,34 +37,34 @@ class Events():
         finally:
             with DbConn() as c:
                 c.execute(
-                """
-                CREATE TABLE EVENTS
-                (
-                    ID INTEGER PRIMARY KEY,
-                    OWNER INTEGER NOT NULL,
-                    NAME TEXT NOT NULL,
-                    DATE TIMESTAMP NOT NULL,
-                    DESCRIPTION TEXT NOT NULL,
-                    LOCATION TEXT NOT NULL
-                )
-                """
+                    """
+                    CREATE TABLE EVENTS
+                    (
+                        ID INTEGER PRIMARY KEY,
+                        OWNER INTEGER NOT NULL,
+                        NAME TEXT NOT NULL,
+                        DATE TIMESTAMP NOT NULL,
+                        DESCRIPTION TEXT NOT NULL,
+                        LOCATION TEXT NOT NULL
+                    )
+                    """
                 )
 
                 c.execute(
-                """
-                CREATE TABLE EVENT_MEMBERS
-                (
-                    ID INTEGER PRIMARY KEY,
-                    EVENT_ID INTEGER,
-                    USER_ID INT NOT NULL
+                    """
+                    CREATE TABLE EVENT_MEMBERS
+                    (
+                        ID INTEGER PRIMARY KEY,
+                        EVENT_ID INTEGER,
+                        USER_ID INT NOT NULL
+                    )
+                    """
                 )
-                """
-                )
-
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
-            pages = self.bot.formatter.format_help_for(ctx, ctx.invoked_subcommand)
+            pages = self.bot.formatter.format_help_for(ctx,
+                                                       ctx.invoked_subcommand)
             for page in pages:
                 await self.bot.send_message(ctx.message.channel, page)
         else:
@@ -80,7 +87,7 @@ class Events():
         name='poll',
         pass_context=True
     )
-    async def _poll(self, ctx, *choices : str):
+    async def _poll(self, ctx, *choices: str):
         """ Ask a question or give multiple choices. """
         try:
             if len(choices) == 0:
@@ -113,18 +120,32 @@ class Events():
         member_name = '???'
         if member is not None:
             member_name = member.nick
-        return '{} ({}) on {} at {}\n\n{}\n\nOrganized by {}'.format(name, ident, self.get_date_str(date), location, description, member_name)
+        return '{} ({}) on {} at {}\n\n{}\n\nOrganized by {}'.format(
+            name,
+            ident,
+            self.get_date_str(date),
+            location,
+            description,
+            member_name
+        )
 
     async def do_event_edit_work(self, ctx, event_id, value_type, new_value):
         try:
             with DbConn() as c:
-                c.execute('UPDATE events SET {} = ? WHERE id = ?'.format(value_type), (new_value, event_id))
-                c.execute("SELECT id, date, name, location, description, owner FROM events WHERE id = ?", event_id)
+                c.execute(
+                    'UPDATE events SET {} = ? WHERE id = ?'.format(value_type),
+                    (new_value, event_id)
+                )
+                c.execute(
+                    """SELECT id, date, name, location, description, owner
+                    FROM events WHERE id = ?
+                    """,
+                    event_id
+                )
                 r = c.fetchone()
             msg = self.get_event_details(ctx, r)
             await self.bot.say(msg)
         except Exception as e:
-            traceback.print_exc()
             await self.bot.say(e)
             return
 
@@ -141,16 +162,34 @@ class Events():
         name='add',
         pass_context=True
     )
-    async def _event_add(self, ctx, name: str, when: str, description: str, location: str):
+    async def _event_add(self,
+                         ctx,
+                         name: str,
+                         when: str,
+                         description: str,
+                         location: str):
         """ Add an event. """
         try:
             date = self.parse_datetime(when)
             with DbConn() as c:
-                c.execute('INSERT INTO events (owner, name, date, description, location) VALUES (?,?,?,?,?)', (ctx.message.author.id, name, date, description, location))
+                c.execute(
+                    """
+                    INSERT INTO events
+                        (owner, name, date, description, location)
+                    VALUES (?,?,?,?,?)
+                    """,
+                    (ctx.message.author.id, name, date, description, location)
+                )
         except Exception as e:
             await self.bot.say(e)
             return
-        await self.bot.say("{} added an event '{}' for {} at {}\n\n{}".format(ctx.message.author.mention, name, self.get_date_str(date), location, description))
+        await self.bot.say("{} added an event '{}' for {} at {}\n\n{}".format(
+                                ctx.message.author.mention,
+                                name,
+                                self.get_date_str(date),
+                                location,
+                                description)
+                           )
 
     @_event.command(
         name='list',
@@ -160,7 +199,12 @@ class Events():
         """ List all events. """
         try:
             with DbConn() as c:
-                c.execute("SELECT id, date, name, location, description, owner FROM events WHERE date >= DATE('now') ORDER BY date ASC")
+                c.execute("""
+                          SELECT id, date, name, location, description, owner
+                          FROM events
+                          WHERE date >= DATE('now')
+                          ORDER BY date ASC
+                          """)
                 results = c.fetchall()
             msg = ''
             if len(results) > 0:
@@ -177,11 +221,16 @@ class Events():
         name='details',
         pass_context=True
     )
-    async def _event_details(self, ctx, event_id : str):
+    async def _event_details(self, ctx, event_id: str):
         """ Get details on chosen events. """
         try:
             with DbConn() as c:
-                c.execute("SELECT id, date, name, location, description, owner FROM events WHERE id = ?", event_id)
+                c.execute("""
+                          SELECT id, date, name, location, description, owner
+                          FROM events
+                          WHERE id = ?
+                          """,
+                          event_id)
                 r = c.fetchone()
             msg = self.get_event_details(ctx, r)
             await self.bot.say(msg)
@@ -202,7 +251,7 @@ class Events():
         name='name',
         pass_context=True
     )
-    async def _event_edit_name(self, ctx, event_id : str, new_value: str):
+    async def _event_edit_name(self, ctx, event_id: str, new_value: str):
         """ Edit chosen event's name. """
         await self.do_event_edit_work(ctx, event_id, 'name', new_value)
 
@@ -210,7 +259,7 @@ class Events():
         name='location',
         pass_context=True
     )
-    async def _event_edit_location(self, ctx, event_id : str, new_value: str):
+    async def _event_edit_location(self, ctx, event_id: str, new_value: str):
         """ Edit chosen event's location. """
         await self.do_event_edit_work(ctx, event_id, 'location', new_value)
 
@@ -218,7 +267,7 @@ class Events():
         name='description',
         pass_context=True
     )
-    async def _event_edit_description(self, ctx, event_id : str, new_value: str):
+    async def _event_edit_desc(self, ctx, event_id: str, new_value: str):
         """ Edit chosen event's description. """
         await self.do_event_edit_work(ctx, event_id, 'description', new_value)
 
@@ -226,7 +275,7 @@ class Events():
         name='date',
         pass_context=True
     )
-    async def _event_edit_date(self, ctx, event_id : str, new_value: str):
+    async def _event_edit_date(self, ctx, event_id: str, new_value: str):
         """ Edit chosen event's date. """
         try:
             date = self.parse_datetime(new_value)
@@ -239,17 +288,23 @@ class Events():
         name='join',
         pass_context=True
     )
-    async def _event_join(self, ctx, event_id : str):
+    async def _event_join(self, ctx, event_id: str):
         """ Join chosen event. """
-        await self.bot.say('DEV: User {} is joining event {}...'.format(ctx.message.author.mention, event_id))
+        await self.bot.say('DEV: User {} is joining event {}...'.format(
+            ctx.message.author.mention,
+            event_id)
+        )
 
     @_event.command(
         name='leave',
         pass_context=True
     )
-    async def _event_leave(self, ctx, event_id : str):
+    async def _event_leave(self, ctx, event_id: str):
         """ Leave chosen event. """
-        await self.bot.say('DEV: User {} is leaving event {}...'.format(ctx.message.author.mention, event_id))
+        await self.bot.say('DEV: User {} is leaving event {}...'.format(
+            ctx.message.author.mention,
+            event_id)
+        )
 
 
 def setup(bot):

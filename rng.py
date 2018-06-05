@@ -2,6 +2,7 @@ import random
 import asyncio
 from discord.ext import commands
 
+
 class RNG():
     def __init__(self, bot):
         self.bot = bot
@@ -9,17 +10,20 @@ class RNG():
     @commands.command(
         name='choose'
     )
-    async def _choose(self, *options : str):
+    async def _choose(self, *options: str):
         """Chooses between several different options. """
-        tmp = await bot.say('Thinking ...')
+        tmp = await self.bot.say('Thinking ...')
         await asyncio.sleep(1)
-        await self.bot.edit_message(tmp, 'Chose: {}'.format(random.choice(options)))
+        await self.bot.edit_message(
+            tmp,
+            'Chose: {}'.format(random.choice(options))
+        )
 
     @commands.command(
         name='roll',
         pass_context=True
     )
-    async def _roll(self, ctx, dice : str):
+    async def _roll(self, ctx, dice: str):
         """Rolls a dice in NdN format."""
         try:
             rolls, limit = map(int, dice.split('d'))
@@ -36,7 +40,10 @@ class RNG():
         result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
         tmp = await self.bot.say('Rolling ...')
         await asyncio.sleep(1)
-        await self.bot.edit_message(tmp, '{} rolled {}!'.format(ctx.message.author.mention, result))
+        await self.bot.edit_message(
+            tmp,
+            '{} rolled {}!'.format(ctx.message.author.mention, result)
+        )
 
 
 def setup(bot):
