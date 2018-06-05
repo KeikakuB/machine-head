@@ -3,6 +3,7 @@
 import json
 
 from discord.ext import commands
+from cogs.utils import checks
 import logging
 
 with open('secret/data.json') as f:
@@ -35,12 +36,6 @@ def globally_block_for_channel(ctx):
         return is_dev_channel
     else:
         return not is_dev_channel
-
-
-def is_admin():
-    def predicate(ctx):
-        return ctx.message.author.id == data['admin_id']
-    return commands.check(predicate)
 
 
 @bot.event
@@ -76,8 +71,8 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-@bot.command(name='load')
-@is_admin()
+@bot.command(name='load', hidden=True)
+@checks.is_owner()
 async def _load(extension_name: str):
     """[ADMIN] Loads an extension."""
     try:
@@ -88,11 +83,11 @@ async def _load(extension_name: str):
     await bot.say("{} loaded.".format(extension_name))
 
 
-@bot.command(name='unload')
-@is_admin()
+@bot.command(name='unload', hidden=True)
+@checks.is_owner()
 async def _unload(extension_name: str):
     """[ADMIN] Unloads an extension."""
-    if extension_name == 'admin':
+    if extension_name == 'cogs.admin':
         await bot.say("{} module can't be unloaded.".format(extension_name))
         return
     bot.unload_extension(extension_name)
