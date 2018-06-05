@@ -5,8 +5,9 @@ Personal Discord bot
 
 # TODO
 - dev:
-    - put extensions into .json file [ {name: x, is_startup: true } , ...]
+    - put common code somewhere (eg. json reading code, is_admin, etc.)
     - Implement command for resetting the db, don't always do it reeeeeeeeeeeeeeeeee
+     - Don't delete data on production server and solidify info I need per event
     - put dev commands in dev module -> it'll work now because I'll import the things i need eg. subprocess
         - only enable it in dev bot
     - if no json data then create it with no values
@@ -17,7 +18,6 @@ Personal Discord bot
     - Make '!cmd' run its default command
     - Make bot usable in dm!? And on other servers
     - Add uptime command to bot
-
 - Event Reminders:
     - Implement !remind *event_id* *message* *timedelta=defaults to at time of meeting*
         - does a @everyone with the event details and the reminder message in the given channel
@@ -29,7 +29,6 @@ Personal Discord bot
     - Add tracking for polls in the db and add a !poll results command and put polls into their own plugin
     - Add mutually exclusive polls which allow people to react in one way to a poll at a time
 - Events:
-    - Don't delete data on production server and solidify info I need per event
     - Implement join and leave commands
 - Looking to play:
     - Design and test some sort of "looking to play" feature
