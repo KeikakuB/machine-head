@@ -5,22 +5,21 @@ Personal Discord bot
 
 # TODO
 - dev:
-    - put common code somewhere (eg. json reading code, is_admin, etc.)
-    - Implement command for resetting the db, don't always do it reeeeeeeeeeeeeeeeee
-     - Don't delete data on production server and solidify info I need per event
-    - put dev commands in dev module -> it'll work now because I'll import the things i need eg. subprocess
-        - only enable it in dev bot
+    - use shorter names (search == find, event == plan?, etc.)
+    - assign to no_pm=true to commands appropriately eg. events, polls
+    - test that is_owner code actually works
+    - double check 'checks' code
+    - put common code somewhere (eg. json reading code, etc.)
     - if no json data then create it with no values
     - https://github.com/JellyWX/reminder-bot/blob/master/Bot/main.py
-    - add member tracking of most recent games they've played
+    - add member tracking of most recent games they've played?
     - try this again https://docs.python.org/2/library/sqlite3.html#sqlite3.Connection.row_factory
-    - add option to insert test data by default when resetting the db
     - Make '!cmd' run its default command
-    - Make bot usable in dm!? And on other servers
-    - Add uptime command to bot
+    - Design data such that same bot instance will work in multiple servers (data/db? anything else?)
+    - Add uptime command to bot (dev)
 - Event Reminders:
     - Implement !remind *event_id* *message* *timedelta=defaults to at time of meeting*
-        - does a @everyone with the event details and the reminder message in the given channel
+        - message can contain @mentions, but defaults to only mentioning person who set the reminder
 - Logging:
     - figure out how to actually see errors as they are raised
     - setup logging everywhere with logger
@@ -29,6 +28,7 @@ Personal Discord bot
     - Add tracking for polls in the db and add a !poll results command and put polls into their own plugin
     - Add mutually exclusive polls which allow people to react in one way to a poll at a time
 - Events:
-    - Implement join and leave commands
+    - Don't throw error when specifying an non-existing event to edit
+
 - Looking to play:
     - Design and test some sort of "looking to play" feature

@@ -1,8 +1,13 @@
 from discord.ext import commands
 from discord.utils import get
+from cogs.utils import checks
 import sqlite3
 import dateparser
 import datetime
+import json
+
+with open('secret/data.json') as f:
+    data = json.load(f)
 
 
 class DbConn():
@@ -30,36 +35,6 @@ emojis_choices = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣'
 class Events():
     def __init__(self, bot):
         self.bot = bot
-        try:
-            with DbConn() as c:
-                c.execute('DROP TABLE events')
-                c.execute('DROP TABLE event_members')
-        finally:
-            with DbConn() as c:
-                c.execute(
-                    """
-                    CREATE TABLE EVENTS
-                    (
-                        ID INTEGER PRIMARY KEY,
-                        OWNER INTEGER NOT NULL,
-                        NAME TEXT NOT NULL,
-                        DATE TIMESTAMP NOT NULL,
-                        DESCRIPTION TEXT NOT NULL,
-                        LOCATION TEXT NOT NULL
-                    )
-                    """
-                )
-
-                c.execute(
-                    """
-                    CREATE TABLE EVENT_MEMBERS
-                    (
-                        ID INTEGER PRIMARY KEY,
-                        EVENT_ID INTEGER,
-                        USER_ID INT NOT NULL
-                    )
-                    """
-                )
 
     async def send_cmd_help(self, ctx):
         if ctx.invoked_subcommand:
@@ -192,6 +167,52 @@ class Events():
                            )
 
     @_event.command(
+        name='reset',
+        pass_context=True,
+        hidden=True
+    )
+    @checks.is_owner()
+    async def _event_reset(self, ctx, should_add_test_data: bool):
+        """ [ADMIN] Resets the database. """
+        await self.bot.say('Resetting the DB.')
+        try:
+            with DbConn() as c:
+                c.execute('DROP TABLE events')
+                c.execute('DROP TABLE event_members')
+        finally:
+            with DbConn() as c:
+                c.execute(
+                    """
+                    CREATE TABLE EVENTS
+                    (
+                        ID INTEGER PRIMARY KEY,
+                        OWNER INTEGER NOT NULL,
+                        NAME TEXT NOT NULL,
+                        DATE TIMESTAMP NOT NULL,
+                        DESCRIPTION TEXT NOT NULL,
+                        LOCATION TEXT NOT NULL
+                    )
+                    """
+                )
+                if should_add_test_data:
+                    await self.bot.say('Inserting test data.')
+                    try:
+                        c.execute(
+                            """
+                            INSERT INTO EVENTS
+                                (owner, name, date, description, location)
+                            VALUES
+                                (?, 'PartyX', ?, 'Party like 1999', 'My Place')
+                            """,
+                            (
+                                data['admin_id'],
+                                datetime.datetime.now()
+                            )
+                        )
+                    except Exception as e:
+                        await self.bot.say(e)
+
+    @_event.command(
         name='list',
         pass_context=True
     )
@@ -283,28 +304,6 @@ class Events():
         except Exception as e:
             await self.bot.say(e)
             return
-
-    @_event.command(
-        name='join',
-        pass_context=True
-    )
-    async def _event_join(self, ctx, event_id: str):
-        """ Join chosen event. """
-        await self.bot.say('DEV: User {} is joining event {}...'.format(
-            ctx.message.author.mention,
-            event_id)
-        )
-
-    @_event.command(
-        name='leave',
-        pass_context=True
-    )
-    async def _event_leave(self, ctx, event_id: str):
-        """ Leave chosen event. """
-        await self.bot.say('DEV: User {} is leaving event {}...'.format(
-            ctx.message.author.mention,
-            event_id)
-        )
 
 
 def setup(bot):
