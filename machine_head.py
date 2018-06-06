@@ -1,13 +1,18 @@
 #! python3
 
+import sys
 import json
 
+import traceback
 from discord.ext import commands
 from cogs.utils import checks
 import logging
+import datetime
 
 with open('secret/data.json') as f:
     data = json.load(f)
+
+start_time = datetime.datetime.now()
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -52,6 +57,16 @@ async def on_command_error(error, ctx):
         await send_cmd_help(ctx)
     elif isinstance(error, commands.BadArgument):
         await send_cmd_help(ctx)
+    elif isinstance(error, commands.NoPrivateMessage):
+        await bot.send_message(ctx.message.author,
+                               'This command cannot be used in private messages.')
+    elif isinstance(error, commands.DisabledCommand):
+        await bot.send_message(ctx.message.author,
+                               'Sorry. This command is disabled and cannot be used.')
+    elif isinstance(error, commands.CommandInvokeError):
+        print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
+        traceback.print_tb(error.original.__traceback__)
+        print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
 
 
 async def send_cmd_help(ctx):
@@ -92,6 +107,24 @@ async def _unload(extension_name: str):
         return
     bot.unload_extension(extension_name)
     await bot.say("{} unloaded.".format(extension_name))
+
+
+@bot.command(name='up', hidden=True)
+@checks.is_owner()
+async def _up():
+    """Returns the amount of time since the bot was first run. """
+    delta = datetime.datetime.now() - start_time
+    s = delta.seconds
+    hours, remainder = divmod(s, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours == 0:
+        if minutes == 0:
+            result = '{}s'.format(seconds)
+        else:
+            result = '{}min'.format(minutes)
+    else:
+        result = '{}h{}min'.format(hours, minutes)
+    await bot.say("I've been awake for {}".format(result))
 
 
 def main():

@@ -159,12 +159,12 @@ class Events():
             await self.bot.say(e)
             return
         await self.bot.say("{} added an event '{}' for {} at {}\n\n{}".format(
-                                ctx.message.author.mention,
-                                name,
-                                self.get_date_str(date),
-                                location,
-                                description)
-                           )
+            ctx.message.author.mention,
+            name,
+            self.get_date_str(date),
+            location,
+            description)
+        )
 
     @_event.command(
         name='reset',

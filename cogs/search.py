@@ -25,6 +25,8 @@ class Search():
         """ Search for game on steam. """
         try:
             search = ' '.join(search)
+            search = regex.escape(search)
+            await self.bot.say("Searching for '{}'".format(search))
             match = regex.search(
                 '"appid":(\d+),"name":"\w*{}'.format(search),
                 self.data_text,
