@@ -17,7 +17,7 @@ start_time = datetime.datetime.now()
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(
-    filename='discord.log',
+    filename='log/machine-head.log',
     encoding='utf-8',
     mode='w')
 handler.setFormatter(
