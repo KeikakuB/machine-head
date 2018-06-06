@@ -10,7 +10,7 @@ Personal Discord bot
     - test that is_owner code actually works
     - double check 'checks' code
     - put common code somewhere (eg. json reading code, etc.)
-    - if no json data then create it with no values
+    - if no json data exists then create a template for it, log it and exit
     - https://github.com/JellyWX/reminder-bot/blob/master/Bot/main.py
     - add member tracking of most recent games they've played?
     - try this again https://docs.python.org/2/library/sqlite3.html#sqlite3.Connection.row_factory

@@ -1,4 +1,5 @@
 # me
+log/
 secret/
 *.pid
 data/
