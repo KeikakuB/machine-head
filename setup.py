@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="machine_head",
-    version="0.1",
+    version="0.2",
     py_modules=['machine_head'],
     packages=find_packages(),
     python_requires='>=3',
