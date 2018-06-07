@@ -125,7 +125,7 @@ class Events():
             return
 
     @commands.group(
-        name='event',
+        name='plan',
         pass_context=True
     )
     async def _event(self, ctx):

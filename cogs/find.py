@@ -2,22 +2,22 @@ import regex
 from discord.ext import commands
 
 
-class Search():
+class Find():
     def __init__(self, bot):
         self.bot = bot
         with open('secret/steamapps.json', encoding='utf-8-sig') as f:
             self.data_text = f.read()
 
     @commands.group(
-        name='search',
+        name='find',
         pass_context=True
     )
-    async def _search(self, ctx):
-        """ Manage search functions. """
+    async def _find(self, ctx):
+        """ Manage find functions. """
         if ctx.invoked_subcommand is None:
             await self.send_cmd_help(ctx)
 
-    @_search.command(
+    @_find.command(
         name='steam',
         pass_context=True
     )
@@ -46,4 +46,4 @@ class Search():
 
 
 def setup(bot):
-    bot.add_cog(Search(bot))
+    bot.add_cog(Find(bot))
