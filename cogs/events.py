@@ -60,6 +60,7 @@ class Events():
 
     @commands.command(
         name='poll',
+        no_pm='true',
         pass_context=True
     )
     async def _poll(self, ctx, *choices: str):
