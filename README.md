@@ -16,7 +16,6 @@ Personal Discord bot
     - try this again https://docs.python.org/2/library/sqlite3.html#sqlite3.Connection.row_factory
     - Make '!cmd' run its default command
     - Design data such that same bot instance will work in multiple servers (data/db? anything else?)
-    - Add uptime command to bot (dev)
 - Event Reminders:
     - Implement !remind *event_id* *message* *timedelta=defaults to at time of meeting*
         - message can contain @mentions, but defaults to only mentioning person who set the reminder
