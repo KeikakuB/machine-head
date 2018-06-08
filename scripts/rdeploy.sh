@@ -1,1 +1,1 @@
-cat _rdeploy.sh | ssh "$1"
+cat deploy.sh | ssh "$1"
