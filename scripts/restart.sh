@@ -1,5 +1,6 @@
 #!/bin/bash
-cd ~/projects/machine-head/
+cd ..
 . venv/bin/activate
-nohup scripts/start.sh > log/shell.out 2> log/shell.err < /dev/null &
+pkill machine_head
+nohup machine_head > log/shell.out 2> log/shell.err < /dev/null &
 

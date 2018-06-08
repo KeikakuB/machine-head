@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ~/projects/machine-head/
+cd ..
 virtualenv -p python3 venv
 . venv/bin/activate
 pip install --editable .

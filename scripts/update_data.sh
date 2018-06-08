@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ~/projects/machine-head/
+cd ..
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET https://api.steampowered.com/ISteamApps/GetAppList/v2/ > secret/steamapps.json
