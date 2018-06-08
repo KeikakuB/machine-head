@@ -1,4 +1,4 @@
-#python3 -m venv venv
+#!/bin/bash
 virtualenv -p python3 venv
 . venv/bin/activate
 pip install --editable .
