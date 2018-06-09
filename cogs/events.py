@@ -108,6 +108,11 @@ class Events():
     async def do_event_edit_work(self, ctx, event_id, value_type, new_value):
         try:
             with DbConn() as c:
+                c.execute('SELECT * FROM events WHERE id = ?', (event_id,))
+                r = c.fetchone()
+                if not r:
+                    await self.bot.say('No event with id: {}'.format(event_id))
+                    return
                 c.execute(
                     'UPDATE events SET {} = ? WHERE id = ?'.format(value_type),
                     (new_value, event_id)
@@ -119,11 +124,10 @@ class Events():
                     event_id
                 )
                 r = c.fetchone()
-            msg = self.get_event_details(ctx, r)
-            await self.bot.say(msg)
+                msg = self.get_event_details(ctx, r)
         except Exception as e:
-            await self.bot.say(e)
-            return
+            msg = e
+        await self.bot.say(msg)
 
     @commands.group(
         name='plan',
