@@ -53,20 +53,24 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(error, ctx):
-    if isinstance(error, commands.MissingRequiredArgument):
+    if (isinstance(error, commands.MissingRequiredArgument) or
+            isinstance(error, commands.BadArgument)):
         await send_cmd_help(ctx)
-    elif isinstance(error, commands.BadArgument):
-        await send_cmd_help(ctx)
+        msg = str(error)
+        if msg:
+            await bot.send_message(ctx.message.channel, msg)
     elif isinstance(error, commands.NoPrivateMessage):
-        await bot.send_message(ctx.message.author,
+        await bot.send_message(ctx.message.channel,
                                'This command cannot be used in private messages.')
     elif isinstance(error, commands.DisabledCommand):
-        await bot.send_message(ctx.message.author,
+        await bot.send_message(ctx.message.channel,
                                'Sorry. This command is disabled and cannot be used.')
     elif isinstance(error, commands.CommandInvokeError):
         print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
         traceback.print_tb(error.original.__traceback__)
         print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
+        await bot.send_message(ctx.message.channel,
+                               'ERROR: Bleeep Blooop. Something went wrong...')
 
 
 async def send_cmd_help(ctx):

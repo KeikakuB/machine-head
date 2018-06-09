@@ -77,14 +77,9 @@ class RNG():
         try:
             rolls, limit = map(int, dice.split('d'))
         except Exception:
-            await self.bot.say('Format has to be in NdN!')
-            return
-        try:
-            if rolls > 19:
-                raise ValueError("That's too many rolls")
-        except Exception as e:
-            await self.bot.say(e)
-            return
+            raise commands.BadArgument('Format has to be in NdN!')
+        if rolls > 19:
+            raise commands.BadArgument("That's too many rolls")
 
         result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
         tmp = await self.bot.say('Rolling ...')

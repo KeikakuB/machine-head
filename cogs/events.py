@@ -36,17 +36,6 @@ class Events():
     def __init__(self, bot):
         self.bot = bot
 
-    async def send_cmd_help(self, ctx):
-        if ctx.invoked_subcommand:
-            pages = self.bot.formatter.format_help_for(ctx,
-                                                       ctx.invoked_subcommand)
-            for page in pages:
-                await self.bot.send_message(ctx.message.channel, page)
-        else:
-            pages = self.bot.formatter.format_help_for(ctx, ctx.command)
-            for page in pages:
-                await self.bot.send_message(ctx.message.channel, page)
-
     def get_date_str(self, date):
         return date.strftime('''%A %B %d at %I:%m%p''')
 
@@ -60,19 +49,14 @@ class Events():
 
     @commands.command(
         name='poll',
-        no_pm='true',
         pass_context=True
     )
     async def _poll(self, ctx, *choices: str):
         """ Ask a question or give multiple choices. """
-        try:
-            if len(choices) == 0:
-                await self.send_cmd_help(ctx)
-            elif len(choices) > 9:
-                raise ValueError('!poll only supports up to nine choices.')
-        except Exception as e:
-            await self.bot.say(e)
-            return
+        if len(choices) == 0:
+            raise commands.MissingRequiredArgument()
+        elif len(choices) > 9:
+            raise commands.BadArgument('!poll only supports up to nine choices.')
         question = '{} wants to know:\n'.format(ctx.message.author.mention)
 
         if len(choices) > 1:
@@ -106,27 +90,23 @@ class Events():
         )
 
     async def do_event_edit_work(self, ctx, event_id, value_type, new_value):
-        try:
-            with DbConn() as c:
-                c.execute('SELECT * FROM events WHERE id = ?', (event_id,))
-                r = c.fetchone()
-                if not r:
-                    await self.bot.say('No event with id: {}'.format(event_id))
-                    return
-                c.execute(
-                    'UPDATE events SET {} = ? WHERE id = ?'.format(value_type),
-                    (new_value, event_id)
-                )
-                c.execute(
-                    """SELECT id, date, name, location, description, owner
-                    FROM events WHERE id = ?
-                    """,
-                    event_id
-                )
-                r = c.fetchone()
-                msg = self.get_event_details(ctx, r)
-        except Exception as e:
-            msg = e
+        with DbConn() as c:
+            c.execute('SELECT * FROM events WHERE id = ?', (event_id,))
+            r = c.fetchone()
+            if not r:
+                raise commands.BadArgument('No event with id: {}'.format(event_id))
+            c.execute(
+                'UPDATE events SET {} = ? WHERE id = ?'.format(value_type),
+                (new_value, event_id)
+            )
+            c.execute(
+                """SELECT id, date, name, location, description, owner
+                FROM events WHERE id = ?
+                """,
+                event_id
+            )
+            r = c.fetchone()
+            msg = self.get_event_details(ctx, r)
         await self.bot.say(msg)
 
     @commands.group(
@@ -136,7 +116,7 @@ class Events():
     async def _event(self, ctx):
         """ Manage events. """
         if ctx.invoked_subcommand is None:
-            await self.send_cmd_help(ctx)
+            raise commands.MissingRequiredArgument()
 
     @_event.command(
         name='add',
@@ -149,20 +129,16 @@ class Events():
                          description: str,
                          location: str):
         """ Add an event. """
-        try:
-            date = self.parse_datetime(when)
-            with DbConn() as c:
-                c.execute(
-                    """
-                    INSERT INTO events
-                        (owner, name, date, description, location)
-                    VALUES (?,?,?,?,?)
-                    """,
-                    (ctx.message.author.id, name, date, description, location)
-                )
-        except Exception as e:
-            await self.bot.say(e)
-            return
+        date = self.parse_datetime(when)
+        with DbConn() as c:
+            c.execute(
+                """
+                INSERT INTO events
+                    (owner, name, date, description, location)
+                VALUES (?,?,?,?,?)
+                """,
+                (ctx.message.author.id, name, date, description, location)
+            )
         await self.bot.say("{} added an event '{}' for {} at {}\n\n{}".format(
             ctx.message.author.mention,
             name,
@@ -201,21 +177,18 @@ class Events():
                 )
                 if should_add_test_data:
                     await self.bot.say('Inserting test data.')
-                    try:
-                        c.execute(
-                            """
-                            INSERT INTO EVENTS
-                                (owner, name, date, description, location)
-                            VALUES
-                                (?, 'PartyX', ?, 'Party like 1999', 'My Place')
-                            """,
-                            (
-                                data['admin_id'],
-                                datetime.datetime.now()
-                            )
+                    c.execute(
+                        """
+                        INSERT INTO EVENTS
+                            (owner, name, date, description, location)
+                        VALUES
+                            (?, 'PartyX', ?, 'Party like 1999', 'My Place')
+                        """,
+                        (
+                            data['admin_id'],
+                            datetime.datetime.now()
                         )
-                    except Exception as e:
-                        await self.bot.say(e)
+                    )
 
     @_event.command(
         name='list',
@@ -223,25 +196,21 @@ class Events():
     )
     async def _event_list(self, ctx):
         """ List all events. """
-        try:
-            with DbConn() as c:
-                c.execute("""
-                          SELECT id, date, name, location, description, owner
-                          FROM events
-                          WHERE date >= DATE('now')
-                          ORDER BY date ASC
-                          """)
-                results = c.fetchall()
-            msg = ''
-            if len(results) > 0:
-                for r in results:
-                    msg += '{}\n\n'.format(self.get_event_details(ctx, r))
-                await self.bot.say(msg)
-            else:
-                await self.bot.say('No events to list.')
-        except Exception as e:
-            await self.bot.say(e)
-            return
+        with DbConn() as c:
+            c.execute("""
+                      SELECT id, date, name, location, description, owner
+                      FROM events
+                      WHERE date >= DATE('now')
+                      ORDER BY date ASC
+                      """)
+            results = c.fetchall()
+        msg = ''
+        if len(results) > 0:
+            for r in results:
+                msg += '{}\n\n'.format(self.get_event_details(ctx, r))
+            await self.bot.say(msg)
+        else:
+            await self.bot.say('No events to list.')
 
     @_event.command(
         name='details',
@@ -249,20 +218,16 @@ class Events():
     )
     async def _event_details(self, ctx, event_id: str):
         """ Get details on chosen events. """
-        try:
-            with DbConn() as c:
-                c.execute("""
-                          SELECT id, date, name, location, description, owner
-                          FROM events
-                          WHERE id = ?
-                          """,
-                          event_id)
-                r = c.fetchone()
-            msg = self.get_event_details(ctx, r)
-            await self.bot.say(msg)
-        except Exception as e:
-            await self.bot.say(e)
-            return
+        with DbConn() as c:
+            c.execute("""
+                      SELECT id, date, name, location, description, owner
+                      FROM events
+                      WHERE id = ?
+                      """,
+                      event_id)
+            r = c.fetchone()
+        msg = self.get_event_details(ctx, r)
+        await self.bot.say(msg)
 
     @_event.group(
         name='edit',
@@ -271,7 +236,7 @@ class Events():
     async def _event_edit(self, ctx):
         """ Manage events. """
         if ctx.invoked_subcommand is None:
-            await self.send_cmd_help(ctx)
+            raise commands.MissingRequiredArgument()
 
     @_event_edit.command(
         name='name',
@@ -303,12 +268,8 @@ class Events():
     )
     async def _event_edit_date(self, ctx, event_id: str, new_value: str):
         """ Edit chosen event's date. """
-        try:
-            date = self.parse_datetime(new_value)
-            await self.do_event_edit_work(ctx, event_id, 'date', date)
-        except Exception as e:
-            await self.bot.say(e)
-            return
+        date = self.parse_datetime(new_value)
+        await self.do_event_edit_work(ctx, event_id, 'date', date)
 
 
 def setup(bot):

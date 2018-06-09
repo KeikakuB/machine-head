@@ -15,7 +15,7 @@ class Find():
     async def _find(self, ctx):
         """ Manage find functions. """
         if ctx.invoked_subcommand is None:
-            await self.send_cmd_help(ctx)
+            raise commands.MissingRequiredArgument()
 
     @_find.command(
         name='steam',
@@ -23,26 +23,23 @@ class Find():
     )
     async def _steam(self, ctx, *search: str):
         """ Search for game on steam. """
-        try:
-            search = ' '.join(search)
-            search = regex.escape(search)
-            await self.bot.say("Searching for '{}'".format(search))
-            match = regex.search(
-                '"appid":(\d+),"name":"\w*{}'.format(search),
-                self.data_text,
-                regex.IGNORECASE
+        search = ' '.join(search)
+        search = regex.escape(search)
+        await self.bot.say("Searching for '{}'".format(search))
+        match = regex.search(
+            '"appid":(\d+),"name":"\w*{}'.format(search),
+            self.data_text,
+            regex.IGNORECASE
+        )
+        if match is not None:
+            id = match.group(1)
+            await self.bot.say(
+                "https://store.steampowered.com/app/{}/".format(id)
             )
-            if match is not None:
-                id = match.group(1)
-                await self.bot.say(
-                    "https://store.steampowered.com/app/{}/".format(id)
-                )
-            else:
-                await self.bot.say(
-                    "No game found with search term '{}'".format(search)
-                )
-        except Exception as e:
-            await self.bot.say(e)
+        else:
+            await self.bot.say(
+                "No game found with search term '{}'".format(search)
+            )
 
 
 def setup(bot):
