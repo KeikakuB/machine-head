@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-cat deploy.sh | ssh "$1"
+cat deploy | ssh "$1"
