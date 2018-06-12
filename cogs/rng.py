@@ -17,6 +17,10 @@ class RNG():
     )
     async def _choose(self, *options: str):
         """Chooses between several different options. """
+        if not options:
+            raise commands.MissingRequiredArgument()
+        if len(options) == 1:
+            raise commands.BadArgument('?choose requires at least two choices.')
         tmp = await self.bot.say('Thinking ...')
         await asyncio.sleep(1)
         await self.bot.edit_message(
