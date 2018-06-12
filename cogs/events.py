@@ -49,6 +49,7 @@ class Events():
 
     @commands.command(
         name='poll',
+        aliases=['p', 'po', 'pol'],
         pass_context=True
     )
     async def _poll(self, ctx, *choices: str):
@@ -110,7 +111,8 @@ class Events():
         await self.bot.say(msg)
 
     @commands.group(
-        name='plan',
+        name='event',
+        aliases=['e', 'ev', 'eve', 'even'],
         pass_context=True
     )
     async def _event(self, ctx):
@@ -120,6 +122,7 @@ class Events():
 
     @_event.command(
         name='add',
+        aliases=['a', 'ad'],
         pass_context=True
     )
     async def _event_add(self,
@@ -149,6 +152,7 @@ class Events():
 
     @_event.command(
         name='reset',
+        aliases=['r', 're', 'res', 'rese'],
         pass_context=True,
         hidden=True
     )
@@ -192,6 +196,7 @@ class Events():
 
     @_event.command(
         name='list',
+        aliases=['l', 'li', 'lis'],
         pass_context=True
     )
     async def _event_list(self, ctx):
@@ -214,6 +219,7 @@ class Events():
 
     @_event.command(
         name='details',
+        aliases=['d', 'de', 'det', 'deta', 'detai'],
         pass_context=True
     )
     async def _event_details(self, ctx, event_id: str):
@@ -231,6 +237,7 @@ class Events():
 
     @_event.group(
         name='edit',
+        aliases=['e', 'ed', 'edi'],
         pass_context=True
     )
     async def _event_edit(self, ctx):
@@ -240,6 +247,7 @@ class Events():
 
     @_event_edit.command(
         name='name',
+        aliases=['n', 'na', 'nam'],
         pass_context=True
     )
     async def _event_edit_name(self, ctx, event_id: str, new_value: str):
@@ -248,6 +256,7 @@ class Events():
 
     @_event_edit.command(
         name='location',
+        aliases=['l', 'lo', 'loc', 'loca', 'locat', 'locati', 'locatio'],
         pass_context=True
     )
     async def _event_edit_location(self, ctx, event_id: str, new_value: str):
@@ -256,6 +265,7 @@ class Events():
 
     @_event_edit.command(
         name='description',
+        aliases=['de', 'des', 'desc', 'descr', 'descri', 'descrip', 'descript', 'descripti', 'descriptio'],
         pass_context=True
     )
     async def _event_edit_desc(self, ctx, event_id: str, new_value: str):
@@ -264,6 +274,7 @@ class Events():
 
     @_event_edit.command(
         name='date',
+        aliases=['d', 'da', 'dat'],
         pass_context=True
     )
     async def _event_edit_date(self, ctx, event_id: str, new_value: str):

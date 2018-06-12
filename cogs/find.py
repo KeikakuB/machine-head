@@ -10,6 +10,7 @@ class Find():
 
     @commands.group(
         name='find',
+        aliases=['f', 'fi', 'fin'],
         pass_context=True
     )
     async def _find(self, ctx):
@@ -19,6 +20,7 @@ class Find():
 
     @_find.command(
         name='steam',
+        aliases=['s', 'st', 'ste', 'stea'],
         pass_context=True
     )
     async def _steam(self, ctx, *search: str):

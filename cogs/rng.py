@@ -12,7 +12,8 @@ class RNG():
         self.word_generated_on = datetime.date.min
 
     @commands.command(
-        name='choose'
+        name='choose',
+        aliases=['c', 'ch', 'cho', 'choo', 'choos'],
     )
     async def _choose(self, *options: str):
         """Chooses between several different options. """
@@ -37,7 +38,8 @@ class RNG():
             return word
 
     @commands.command(
-        name='wotd'
+        name='wotd',
+        aliases=['w', 'wo', 'wot']
     )
     async def _wotd(self):
         """Returns the word of the day. """
@@ -70,6 +72,7 @@ class RNG():
 
     @commands.command(
         name='roll',
+        aliases=['r', 'ro', 'rol'],
         pass_context=True
     )
     async def _roll(self, ctx, dice: str):
