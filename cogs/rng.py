@@ -13,7 +13,7 @@ class RNG():
 
     @commands.command(
         name='choose',
-        aliases=['c', 'ch', 'cho', 'choo', 'choos'],
+        aliases=['ch', 'cho', 'choo', 'choos'],
     )
     async def _choose(self, *options: str):
         """Chooses between several different options. """

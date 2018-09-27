@@ -25,10 +25,7 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-
-There are a number of utility commands being showcased here.'''
+description = '''My personal bot.'''
 
 command_prefix = '?'
 bot = commands.Bot(command_prefix=command_prefix)
