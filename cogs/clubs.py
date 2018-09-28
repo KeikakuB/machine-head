@@ -43,6 +43,23 @@ class Clubs():
         club_members_permissions = discord.PermissionOverwrite(read_messages=True, send_messages=True)
         club_channel = await self.bot.create_channel(author.server, club_name, (author.server.default_role, everyone_permissions), (club_role, club_members_permissions))
 
+
+    @_club.command(name='show', aliases=['s', 'sh', 'sho'], pass_context=True)
+    async def _list(self, ctx, club : discord.Channel):
+        """List all info pertaining to a given club channel."""
+        club_role = self.find_club_role(club)
+        members = ctx.message.author.server.members
+        club_members = [m for m in members if club_role in m.roles]
+        club_description = "Club: {}\n".format(club.name)
+        club_description += "Role: {}\n".format(club_role.name)
+        club_description += "Members:\n"
+        for m in club_members:
+            club_description += "- {} ({})\n".format(m.display_name, m.name)
+
+        await self.bot.say(club_description)
+        if len(club_members) == 0:
+            await self.bot.say("No members found")
+
     @_club.command(name='add_member', aliases=['a', 'ad', 'add', 'add_', 'add_m', 'add_me', 'add_mem', 'add_memb', 'add_membe'], pass_context=True)
     async def _add(self, ctx, club : discord.Channel, member : discord.Member):
         """Add a new member to a club channel."""
