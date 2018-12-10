@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+#TODO(keikakub): bug -> channels becomes lowercase so should check input
+#TODO(keikakub): add feature to self leave group
+#TODO(keikakub): rename "delete club" to "disband club" 
+#TODO(keikakub): implement self join club feature??? not sure what this means...
+
 import sys
 import json
 
